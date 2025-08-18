@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Post } from '@/Types/Posts';
+import { Post } from '@/app/_types/Posts';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 
