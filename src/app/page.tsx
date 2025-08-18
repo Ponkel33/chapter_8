@@ -3,19 +3,28 @@
 import Link from "next/link";
 import React from "react";
 import { useState, useEffect } from "react";
-import { Post } from '@/app/_types/Posts';
+import { MicroCMSPost } from '@/app/_types/Posts';
 
 export default function Home () {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<MicroCMSPost[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetcher = async () => {
       setLoading(true);  
-      const res = await fetch("https://1hmfpsvto6.execute-api.ap-northeast-1.amazonaws.com/dev/posts");
+      try {
+      const res = await fetch("https://vmqw2afmcl.microcms.io/api/v1/posts", {
+        headers: {
+          'X-MICROCMS-API-KEY': process.env.NEXT_PUBLIC_MICROCMS_API_KEY as string,
+        },
+      })
       const data = await res.json();
-      setPosts(data.posts);
-      setLoading(false);
+      setPosts(data.contents);
+      } catch (error) {
+        console.error('エラーが発生しました:', error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetcher();
   }, []);
@@ -36,7 +45,7 @@ export default function Home () {
               <div className="flex justify-end">
               {post.categories.map(category => {
                 return (
-                  <div key={category} className="text-blue-500 border border-blue-500 rounded mx-0.5 px-1">{category}</div>
+                  <div key={category.id} className="text-blue-500 border border-blue-500 rounded mx-0.5 px-1">{category.name}</div>
                 )
               })}
               </div>
