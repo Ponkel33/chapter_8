@@ -3,23 +3,20 @@
 import Link from "next/link";
 import React from "react";
 import { useState, useEffect } from "react";
-import { MicroCMSPost } from '@/app/_types/Posts';
+// import { MicroCMSPost } from '@/app/_types/Posts';
+import { OwnPost } from '@/app/_types/Posts';
 
 export default function Home () {
-  const [posts, setPosts] = useState<MicroCMSPost[]>([]);
+  const [posts, setPosts] = useState<OwnPost[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetcher = async () => {
       setLoading(true);  
       try {
-      const res = await fetch("https://vmqw2afmcl.microcms.io/api/v1/posts", {
-        headers: {
-          'X-MICROCMS-API-KEY': process.env.NEXT_PUBLIC_MICROCMS_API_KEY as string,
-        },
-      })
+      const res = await fetch("api/posts")
       const data = await res.json();
-      setPosts(data.contents);
+      setPosts(data.posts);
       } catch (error) {
         console.error('エラーが発生しました:', error);
       } finally {
@@ -43,9 +40,9 @@ export default function Home () {
             <Link href={`/posts/${post.id}`}>
               <div className="text-gray-500 text-sm">{new Date(post.createdAt).toLocaleDateString()}</div>
               <div className="flex justify-end">
-              {post.categories.map(category => {
+              {post.postCategories.map( postCategory => {
                 return (
-                  <div key={category.id} className="text-blue-500 border border-blue-500 rounded mx-0.5 px-1">{category.name}</div>
+                  <div key={postCategory.category.id} className="text-blue-500 border border-blue-500 rounded mx-0.5 px-1">{postCategory.category.name}</div>
                 )
               })}
               </div>
