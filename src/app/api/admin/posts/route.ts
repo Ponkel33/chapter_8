@@ -1,14 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
+import { PostRequestBody } from '@/app/_types/RequestBody';
 
 const prisma = new PrismaClient();
-
-interface CreatePostRequestBody {
-  title: string
-  content: string
-  categories: { id: number }[]
-  thumbnailUrl: string
-}
 
 export const GET = async (request: NextRequest) => {
   try {
@@ -40,7 +34,7 @@ export const GET = async (request: NextRequest) => {
 export const POST = async (request: NextRequest, context: any) => {
   try{
     const body = await request.json()
-    const { title, content, categories, thumbnailUrl }: CreatePostRequestBody = body
+    const { title, content, categories, thumbnailUrl }: PostRequestBody = body
     const data = await prisma.post.create({
       data: {
         title, content, thumbnailUrl,
