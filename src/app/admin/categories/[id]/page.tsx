@@ -1,11 +1,12 @@
 "use client"
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-
+import { useRouter } from "next/navigation"
 
 export default function AdminCategoriesId() {
   const { id } = useParams()
   const [name, setName] = useState('')
+  const router = useRouter()
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,6 +26,7 @@ export default function AdminCategoriesId() {
     await fetch(`/api/admin/categories/${id}`, {
       method: 'DELETE',
     })
+    router.push(`/admin/categories`)
     alert('削除しました')
   }
 

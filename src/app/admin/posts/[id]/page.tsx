@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Category } from "@/app/_types/Category";
+import { useRouter } from "next/navigation";
+import { CategoriesSelect } from "../_components/CategoriesSelect";
 
 export default function AdminPostsId() {
   const { id } = useParams()
@@ -10,6 +12,8 @@ export default function AdminPostsId() {
   const [content, setContent] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [categories, setCategories] = useState<Category[]>([])
+
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,6 +29,9 @@ export default function AdminPostsId() {
         categories,
       }),
     })
+
+    router.push(`posts/${id}`)
+
     alert('更新しました')
   }
 
@@ -33,6 +40,8 @@ export default function AdminPostsId() {
     await fetch(`/api/admin/posts/${id}`, {
       method: 'DELETE',
     })
+    router.push(`/admin/posts`)
+
     alert('削除しました')
   }
 
@@ -87,13 +96,14 @@ export default function AdminPostsId() {
       </div>
       <div className="mb-4">
         <div className="">カテゴリー</div>
-        <select id="categories" name="categories" className="w-full border border-gray-300 rounded h-8 p-6">
+        <CategoriesSelect selectedCategories={categories} setSelectedCategories={setCategories}/>
+        {/* <select id="categories" name="categories" className="w-full border border-gray-300 rounded h-8 p-6">
             {categories.map(category => {
                 return (
                     <option key={category.id} value={category.id}>{category.name}</option>
                 )
             })}
-        </select>
+        </select> */}
       </div>
       <div className="flex justify-left">
         <button type='button' className="bg-gray-800 text-white font-bold rounded-lg px-6 py-2 mr-4 hover:cursor-pointer" onClick={handleSubmit}>更新</button>
