@@ -1,19 +1,22 @@
 "use client"
 
 import { useState } from "react";
-
+import { useRouter } from "next/navigation";
 import { Category } from "@/app/_types/Category";
+import { CategoriesSelect } from "../_components/CategoriesSelect";
 
 export default function AdminPostsId() {
-
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
-  const [thumbnailUrl, setThumbnailUrl] = useState('')
+  const [thumbnailUrl, setThumbnailUrl] = useState('https://placehold.jp/800x400.png')
   const [categories, setCategories] = useState<Category[]>([])
+
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await fetch("/api/admin/posts", {
+    
+    const res = await fetch("/api/admin/posts", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -25,6 +28,11 @@ export default function AdminPostsId() {
         categories,
       }),
     })
+
+    const { id } = await res.json()
+
+    router.push(`/posts/${id}`)
+
     alert('登録しました')
   }
 
@@ -62,13 +70,14 @@ export default function AdminPostsId() {
       </div>
       <div className="mb-4">
         <div className="">カテゴリー</div>
-        <select id="categories" name="categories" className="w-full border border-gray-300 rounded h-8 p-6">
+        <CategoriesSelect selectedCategories={categories} setSelectedCategories={setCategories}/>
+        {/* <select id="categories" name="categories" className="w-full border border-gray-300 rounded h-8 p-6">
             {categories.map(category => {
                 return (
                     <option key={category.id} value={category.id}>{category.name}</option>
                 )
             })}
-        </select>
+        </select> */}
       </div>
       <div className="flex justify-left">
         <button type='submit' className="bg-gray-800 text-white font-bold rounded-lg px-6 py-2 mr-4 hover:cursor-pointer" onClick={handleSubmit}>送信</button>

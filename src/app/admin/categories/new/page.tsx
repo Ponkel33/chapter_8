@@ -1,8 +1,10 @@
 "use client"
 import { useState } from "react";
+import { useRouter } from "next/navigation"
 
 export default function AdminCategoriesId() {
   const [name, setName] = useState('')
+  const router = useRouter()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target
@@ -20,6 +22,7 @@ export default function AdminCategoriesId() {
         name,
       }),
     })
+    router.push(`/admin/categories`)
     alert('登録しました')
   }
 

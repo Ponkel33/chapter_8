@@ -4,7 +4,7 @@ import { CategoryRequestBody } from '@/app/_types/RequestBody';
 
 const prisma = new PrismaClient();
 
-export const GET = async (request: NextRequest) => {
+export const GET = async () => {
   try {
     const categories = await prisma.category.findMany({
       orderBy: {
