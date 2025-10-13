@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { MicroCMSPost } from '@/app/_types/Posts';
+import { OwnPost } from '@/app/_types/Posts';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 
@@ -13,7 +13,7 @@ import Image from 'next/image';
 
 export default function Posts() {
   const { id } = useParams<{ id: string }>();
-  const [post, setPost] = useState<MicroCMSPost | null>(null);
+  const [post, setPost] = useState<OwnPost | null>(null);
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
@@ -25,14 +25,10 @@ export default function Posts() {
       }
 
       try{
-      const res = await fetch(`https://vmqw2afmcl.microcms.io/api/v1/posts/${id}`, {
-        headers: {
-          'X-MICROCMS-API-KEY': process.env.NEXT_PUBLIC_MICROCMS_API_KEY as string,
-        },
-      });
+      const res = await fetch(`/api/posts/${id}`);
       // const res = await fetch(`https://1hmfpsvto6.execute-api.ap-northeast-1.amazonaws.com/dev/posts/${id}`);
-      const data : MicroCMSPost = await res.json();
-      setPost(data) 
+      const data = await res.json();
+      setPost(data.post) 
       }catch(error){
         console.log(error);
       }
@@ -57,12 +53,12 @@ export default function Posts() {
 
   return (
     <div className="max-w-3xl mx-auto my-2 p-2">
-      <Image width={post.thumbnail.width} height={post.thumbnail.height} className="object-cover" src={post.thumbnail.url} alt="" />
+      <Image width={1000} height={1000} src={post.thumbnailUrl} alt="" />
       <div className="text-gray-500 text-sm">{new Date(post.createdAt).toLocaleDateString()}</div>
       <div className="flex justify-end">
-      {post.categories.map(category => {
+      {post.postCategories.map(postCategory => {
         return (
-          <div key={category.id} className="text-blue-500 border border-blue-500 rounded mx-0.5 px-1">{category.name}</div>
+          <div key={postCategory.category.id} className="text-blue-500 border border-blue-500 rounded mx-0.5 px-1">{postCategory.category.name}</div>
         )
       })}
       </div>

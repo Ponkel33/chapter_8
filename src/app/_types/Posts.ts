@@ -1,3 +1,5 @@
+import { Category } from './Category'
+
 // export type Post = {
 //   id: number;
 //   title: string;
@@ -15,3 +17,16 @@ export type MicroCMSPost = {
   categories: { id: string; name: string }[]
   thumbnail: { url: string; height: number; width: number }
 }
+
+
+
+export type OwnPost = {
+  id: number
+  title: string
+  content: string
+  thumbnailUrl: string
+  createdAt: string
+  updatedAt: string
+  postCategories: { category: Category }[]
+}
+
