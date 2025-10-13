@@ -72,13 +72,14 @@ export default function CategoryForm( {id}: {id: string | undefined}) {
 
   return (
     <div>
-      <h1 className="text-xl font-bold">カテゴリー編集</h1>
+      {id && <h1 className="text-xl font-bold pb-4">カテゴリー編集</h1>}
+      {!id && <h1 className="text-xl font-bold pb-4">カテゴリー新規作成</h1>}
       <div className="mb-4">
         <div className="">カテゴリー名</div>
         <input id="name" value={name} name="name" type="text" className="w-full border border-gray-300 rounded h-8 p-6" onChange={handleChange}/>
       </div>
       <div className="flex justify-left">
-        <button type='submit' className="bg-gray-800 text-white font-bold rounded-lg px-6 py-2 mr-4 hover:cursor-pointer" onClick={handleSubmit}>更新</button>
+        <button type='submit' className="bg-gray-800 text-white font-bold rounded-lg px-6 py-2 mr-4 hover:cursor-pointer" onClick={handleSubmit}>{id ? '更新' : '新規作成'}</button>
         {id && <button type='button' className="bg-gray-200 text-gray-800 font-bold rounded-lg px-6 py-2 hover:cursor-pointer" onClick={handleDelete}>削除</button>}
       </div>
     </div>
