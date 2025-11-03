@@ -4,29 +4,41 @@ import { CategoriesSelect } from "./CategoriesSelect";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Category } from "@/app/_types/Category";
+import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession"
+import { supabase } from "@/utils/supabase"
+import { v4 as uuidv4 } from 'uuid'
+import type { ChangeEvent } from 'react'
+import Image from 'next/image'
 
 export default function PostForm({id}: {id: string | undefined}) {
 
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
-  const [thumbnailUrl, setThumbnailUrl] = useState('')
+  // const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [categories, setCategories] = useState<Category[]>([])
+  const [thumbnailImageKey, setThumbnailImageKey] = useState('')
+  const [thumbnailImageUrl, setThumbnailImageUrl] = useState<null | string>(null)  
 
   const router = useRouter()
 
+  const { token } = useSupabaseSession()
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!token) return
+
     try {
       if (!id) {
         const res = await fetch("/api/admin/posts", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: token,
           },
           body: JSON.stringify({
             title,
             content,
-            thumbnailUrl,
+            thumbnailImageKey,
             categories,
           }),
         })
@@ -38,11 +50,12 @@ export default function PostForm({id}: {id: string | undefined}) {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: token,
           },
           body: JSON.stringify({
             title,
             content,
-            thumbnailUrl,
+            thumbnailImageKey,
             categories,
           }),
         })
@@ -58,11 +71,21 @@ export default function PostForm({id}: {id: string | undefined}) {
 
   //削除のボタンハンドラー
   const handleDelete = async () => {
+    if (!token) return
+    
+    try{
     await fetch(`/api/admin/posts/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
       method: 'DELETE',
     })
     router.push(`/admin/posts`)
     alert('削除しました')
+    } catch (error) {
+      console.error('エラーが発生しました:', error)
+    }
   }
 
   //フォームの更新時のハンドラー
@@ -75,28 +98,76 @@ export default function PostForm({id}: {id: string | undefined}) {
       case 'content':
         setContent(value)
         break
-      case 'thumbnailUrl':
-        setThumbnailUrl(value)
-        break
+      // case 'thumbnailUrl':
+      //   setThumbnailUrl(value)
+      //   break
     }
+  }
+
+  //サムネイル画像の変更
+  const handleImageChange = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ): Promise<void> => {
+    if (!event.target.files || event.target.files.length == 0) {
+      return
+    }
+    const file = event.target.files[0]
+
+    const filePath = `private/${uuidv4()}`
+
+    const { data, error } = await supabase.storage
+      .from('post_thumbnail')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+
+      if (error) {
+        alert(error.message)
+        return
+      }
+      setThumbnailImageKey(data.path)
   }
 
   //IDに基づいて記事を取得
   useEffect(() => {
     const fetcher = async () => {
+      if (!token) return
       try{
-      const res = await fetch(`/api/admin/posts/${id}`)
+      const res = await fetch(`/api/admin/posts/${id}`,{
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token,
+        },
+      })
       const data = await res.json()
       setTitle(data.post.title)
       setContent(data.post.content)
-      setThumbnailUrl(data.post.thumbnailUrl)
+      setThumbnailImageKey(data.post.thumbnailImageKey)
       setCategories(data.post.postCategories.map((postCategory: { category: Category }) => postCategory.category))
       } catch (error) {
         console.error('エラーが発生しました:', error);
       }
     }
     fetcher();
-  }, [id])
+  }, [id, token])
+
+  useEffect(() => {
+    if (!thumbnailImageKey) return
+
+    // アップロード時に取得した、thumbnailImageKeyを用いて画像のURLを取得
+    const fetcher = async () => {
+      const {
+        data: { publicUrl },
+      } = await supabase.storage
+        .from('post_thumbnail')
+        .getPublicUrl(thumbnailImageKey)
+
+      setThumbnailImageUrl(publicUrl)
+    }
+
+    fetcher()
+  }, [thumbnailImageKey])
 
 
 
@@ -114,8 +185,13 @@ export default function PostForm({id}: {id: string | undefined}) {
       </div>
       <div className="mb-4">
         <div className="">サムネイルURL</div>
-        <input id="thumbnailUrl" value={thumbnailUrl} name="thumbnailUrl" type="text" className="w-full border border-gray-300 rounded h-8 p-6" onChange={handleChange}/>
+        <input type="file" id="thumbnailImageKey" onChange={handleImageChange} accept="image/*" />
       </div>
+     {thumbnailImageUrl && (
+      <div className="mt-2">
+      <Image src={thumbnailImageUrl} alt="thumbnail" width={400} height={400}/>
+      </div>
+    )}
       <div className="mb-4">
         <div className="">カテゴリー</div>
         <CategoriesSelect selectedCategories={categories} setSelectedCategories={setCategories}/>

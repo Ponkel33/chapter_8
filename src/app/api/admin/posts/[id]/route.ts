@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { PostRequestBody } from '@/app/_types/RequestBody';
+import { supabase } from '@/utils/supabase'
 
 const prisma = new PrismaClient();
 
 export const GET = async (request: NextRequest, { params }: { params: { id: string }}) => {
+  const token = request.headers.get('Authorization') ?? ''
+  const { error } = await supabase.auth.getUser(token)
+  if (error)
+    return NextResponse.json({ status: error.message }, { status: 400 })
+
   const { id } = params;
   try { 
     const post = await prisma.post.findUnique({
@@ -33,9 +39,14 @@ export const GET = async (request: NextRequest, { params }: { params: { id: stri
 }
 
 export const PUT = async (request: NextRequest, { params }: { params: { id: string }}) => {
+  const token = request.headers.get('Authorization') ?? ''
+  const { error } = await supabase.auth.getUser(token)
+  if (error)
+    return NextResponse.json({ status: error.message }, { status: 400 })
+
   const { id } = params;
   
-  const { title, content, categories, thumbnailUrl }: PostRequestBody = await request.json();
+  const { title, content, categories, thumbnailImageKey }: PostRequestBody = await request.json();
 
   try {
     const post = await prisma.post.update({
@@ -45,7 +56,7 @@ export const PUT = async (request: NextRequest, { params }: { params: { id: stri
       data: {
         title,
         content,
-        thumbnailUrl,
+        thumbnailImageKey,
       },
     })
 
@@ -72,6 +83,11 @@ export const PUT = async (request: NextRequest, { params }: { params: { id: stri
 }
 
 export const DELETE = async (request: NextRequest, { params }: { params: { id: string }},) => {
+  const token = request.headers.get('Authorization') ?? ''
+  const { error } = await supabase.auth.getUser(token)
+  if (error)
+    return NextResponse.json({ status: error.message }, { status: 400 })
+
   const { id } = params;
   try{
     await prisma.post.delete({

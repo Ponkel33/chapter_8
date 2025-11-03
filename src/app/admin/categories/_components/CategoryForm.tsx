@@ -1,19 +1,23 @@
 "use client"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession"
 
 export default function CategoryForm( {id}: {id: string | undefined}) {
   const [name, setName] = useState('')
   const router = useRouter()
+  const { token } = useSupabaseSession()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!token) return
     try{
       if (!id) {
         await fetch(`/api/admin/categories`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: token,
           },
           body: JSON.stringify({
             name,
@@ -25,6 +29,7 @@ export default function CategoryForm( {id}: {id: string | undefined}) {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: token,
           },
           body: JSON.stringify({
             name,
@@ -39,9 +44,14 @@ export default function CategoryForm( {id}: {id: string | undefined}) {
   }
   
   const handleDelete = async () => {
+    if (!token) return
     try { 
       await fetch(`/api/admin/categories/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token,
+        },
       })
       router.push(`/admin/categories`)
       alert('削除しました')
@@ -57,10 +67,16 @@ export default function CategoryForm( {id}: {id: string | undefined}) {
   }
 
   useEffect(() => {
+    if (!token) return
     if (!id) return
     const fetcher = async () => {
       try{
-        const res = await fetch(`/api/admin/categories/${id}`)
+        const res = await fetch(`/api/admin/categories/${id}`,{
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: token,
+          },
+        })
         const data = await res.json()
         setName(data.category.name)
       } catch (error) {
@@ -68,7 +84,7 @@ export default function CategoryForm( {id}: {id: string | undefined}) {
       }
     }
     fetcher()
-  }, [id])
+  }, [id, token])
 
   return (
     <div>

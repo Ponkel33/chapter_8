@@ -9,14 +9,14 @@ import { Category } from './Category'
 //   content: string;
 // }
 
-export type MicroCMSPost = {
-  id: string
-  title: string
-  content: string
-  createdAt: string
-  categories: { id: string; name: string }[]
-  thumbnail: { url: string; height: number; width: number }
-}
+// export type MicroCMSPost = {
+//   id: string
+//   title: string
+//   content: string
+//   createdAt: string
+//   categories: { id: string; name: string }[]
+//   thumbnail: { url: string; height: number; width: number }
+// }
 
 
 
@@ -24,7 +24,7 @@ export type OwnPost = {
   id: number
   title: string
   content: string
-  thumbnailUrl: string
+  thumbnailImageKey: string
   createdAt: string
   updatedAt: string
   postCategories: { category: Category }[]

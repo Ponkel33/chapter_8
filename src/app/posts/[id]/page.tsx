@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { OwnPost } from '@/app/_types/Posts';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
+import { supabase } from "@/utils/supabase"
 
 // type response = {
 //   message: string;
@@ -15,6 +16,7 @@ export default function Posts() {
   const { id } = useParams<{ id: string }>();
   const [post, setPost] = useState<OwnPost | null>(null);
   const [loading, setLoading] = useState<boolean>(true)
+  const [thumbnailImageUrl, setThumbnailImageUrl] = useState<string | null>(null)
 
   useEffect(() => {
     const fetcher = async (): Promise<void> => {
@@ -39,6 +41,20 @@ export default function Posts() {
     fetcher();
   }, [id]);
 
+  useEffect(() => {
+    if(!post?.thumbnailImageKey) return;
+    const fetcher = async() => {
+      const {
+        data: { publicUrl },
+      } = await supabase.storage
+        .from('post_thumbnail')
+        .getPublicUrl(post.thumbnailImageKey)
+
+      setThumbnailImageUrl(publicUrl)
+    }
+    fetcher();
+  }, [post])
+
   if (loading) {
     return (
       <div className="text-2xl text-center">情報取得中…</div>
@@ -53,7 +69,11 @@ export default function Posts() {
 
   return (
     <div className="max-w-3xl mx-auto my-2 p-2">
-      <Image width={1000} height={1000} src={post.thumbnailUrl} alt="" />
+      {thumbnailImageUrl && (
+        <div className="mt-2">
+        <Image src={thumbnailImageUrl} alt="thumbnail" width={400} height={400}/>
+      </div>
+      )}
       <div className="text-gray-500 text-sm">{new Date(post.createdAt).toLocaleDateString()}</div>
       <div className="flex justify-end">
       {post.postCategories.map(postCategory => {

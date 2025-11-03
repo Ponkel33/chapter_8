@@ -1,15 +1,45 @@
-"use client";
+'use client'
 
-import Link from "next/link";
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useRouteGuard } from '../_hooks/useRouteGuard'
 
-export default function Sidebar({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  useRouteGuard()
+
+  const pathname = usePathname()
+  const isSelected = (href: string) => {
+    return pathname.includes(href)
+  }
+
   return (
-    <div className="flex">
-    <div className="w-1/4 bg-gray-200 p-4 h-screen">
-      <Link className="p-4 block hover:bg-gray-300" href="/admin/posts">記事一覧</Link>
-      <Link className="p-4 block hover:bg-gray-300" href="/admin/categories">カテゴリー一覧</Link>
-    </div>
-    <div className="w-3/4 p-4">{children}</div>
-    </div>
+    <>
+      {/* サイドバー */}
+      <aside className="fixed bg-gray-100 w-[280px] left-0 bottom-0 top-[72px]">
+        <Link
+          href="/admin/posts"
+          className={`p-4 block hover:bg-blue-100 ${
+            isSelected('/admin/posts') && 'bg-blue-100'
+          }`}
+        >
+          記事一覧
+        </Link>
+        <Link
+          href="/admin/categories"
+          className={`p-4 block hover:bg-blue-100 ${
+            isSelected('/admin/categories') && 'bg-blue-100'
+          }`}
+        >
+          カテゴリー一覧
+        </Link>
+      </aside>
+
+      {/* メインエリア */}
+      <div className="ml-[280px] p-4">{children}</div>
+    </>
   )
 }
