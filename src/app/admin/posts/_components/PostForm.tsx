@@ -4,27 +4,56 @@ import { CategoriesSelect } from "./CategoriesSelect";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Category } from "@/app/_types/Category";
-import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession"
-import { supabase } from "@/utils/supabase"
-import { v4 as uuidv4 } from 'uuid'
-import type { ChangeEvent } from 'react'
-import Image from 'next/image'
+import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession";
+import { supabase } from "@/utils/supabase";
+import { v4 as uuidv4 } from 'uuid';
+import type { ChangeEvent } from 'react';
+import Image from 'next/image';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+
+type Inputs = {
+  title: string;
+  content: string;
+  thumbnailImageKey: string;
+  categories: Category[];
+};
 
 export default function PostForm({id}: {id: string | undefined}) {
 
-  const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
+  // const [title, setTitle] = useState('')
+  // const [content, setContent] = useState('')
   // const [thumbnailUrl, setThumbnailUrl] = useState('')
-  const [categories, setCategories] = useState<Category[]>([])
-  const [thumbnailImageKey, setThumbnailImageKey] = useState('')
+  // const [categories, setCategories] = useState<Category[]>([])
+  // const [thumbnailImageKey, setThumbnailImageKey] = useState('')
   const [thumbnailImageUrl, setThumbnailImageUrl] = useState<null | string>(null)  
 
   const router = useRouter()
 
   const { token } = useSupabaseSession()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const { 
+    register, 
+    handleSubmit, 
+    control, 
+    formState: { errors, isSubmitting }, 
+    setValue, 
+    reset, 
+    watch,
+   } = useForm<Inputs>({
+    defaultValues: {
+      title: '',
+      content: '',
+      thumbnailImageKey: '',
+      categories: [],
+    }
+  });
+
+  const watchedThumbailimageKey = watch('thumbnailImageKey');
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault()
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+
     if (!token) return
 
     try {
@@ -36,10 +65,10 @@ export default function PostForm({id}: {id: string | undefined}) {
             Authorization: token,
           },
           body: JSON.stringify({
-            title,
-            content,
-            thumbnailImageKey,
-            categories,
+            title: data.title,
+            content: data.content,
+            thumbnailImageKey: data.thumbnailImageKey,
+            categories: data.categories,
           }),
         })
         const { id: newId } = await res.json()
@@ -53,10 +82,10 @@ export default function PostForm({id}: {id: string | undefined}) {
             Authorization: token,
           },
           body: JSON.stringify({
-            title,
-            content,
-            thumbnailImageKey,
-            categories,
+            title: data.title,
+            content: data.content,
+            thumbnailImageKey: data.thumbnailImageKey,
+            categories: data.categories,
           }),
         })
         router.push(`/posts/${id}`)
@@ -89,20 +118,20 @@ export default function PostForm({id}: {id: string | undefined}) {
   }
 
   //フォームの更新時のハンドラー
-  const handleChange =  (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    switch (name) {
-      case 'title':
-        setTitle(value)
-        break
-      case 'content':
-        setContent(value)
-        break
-      // case 'thumbnailUrl':
-      //   setThumbnailUrl(value)
-      //   break
-    }
-  }
+  // const handleChange =  (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  //   const { name, value } = e.target
+  //   switch (name) {
+  //     case 'title':
+  //       setTitle(value)
+  //       break
+  //     case 'content':
+  //       setContent(value)
+  //       break
+  //     // case 'thumbnailUrl':
+  //     //   setThumbnailUrl(value)
+  //     //   break
+  //   }
+  // }
 
   //サムネイル画像の変更
   const handleImageChange = async (
@@ -126,7 +155,11 @@ export default function PostForm({id}: {id: string | undefined}) {
         alert(error.message)
         return
       }
-      setThumbnailImageKey(data.path)
+      // setThumbnailImageKey(data.path)
+      setValue('thumbnailImageKey', data.path, {
+        shouldDirty: true,
+        shouldValidate: true
+      });
   }
 
   //IDに基づいて記事を取得
@@ -141,19 +174,28 @@ export default function PostForm({id}: {id: string | undefined}) {
         },
       })
       const data = await res.json()
-      setTitle(data.post.title)
-      setContent(data.post.content)
-      setThumbnailImageKey(data.post.thumbnailImageKey)
-      setCategories(data.post.postCategories.map((postCategory: { category: Category }) => postCategory.category))
+      // setTitle(data.post.title)
+      // setContent(data.post.content)
+      // setThumbnailImageKey(data.post.thumbnailImageKey)
+      // setCategories(data.post.postCategories.map((postCategory: { category: Category }) => postCategory.category))
+      reset({
+        title: data.post.title,
+        content: data.post.content,
+        thumbnailImageKey: data.post.thumbnailImageKey,
+        categories: data.post.postCategories.map((postCategory: { category: Category }) => postCategory.category)
+      });
       } catch (error) {
         console.error('エラーが発生しました:', error);
       }
     }
     fetcher();
-  }, [id, token])
+  }, [id, token, reset])
 
   useEffect(() => {
-    if (!thumbnailImageKey) return
+    if (!watchedThumbailimageKey) {
+      setThumbnailImageUrl(null)
+      return
+    }
 
     // アップロード時に取得した、thumbnailImageKeyを用いて画像のURLを取得
     const fetcher = async () => {
@@ -161,27 +203,29 @@ export default function PostForm({id}: {id: string | undefined}) {
         data: { publicUrl },
       } = await supabase.storage
         .from('post_thumbnail')
-        .getPublicUrl(thumbnailImageKey)
+        .getPublicUrl(watchedThumbailimageKey)
 
       setThumbnailImageUrl(publicUrl)
     }
 
     fetcher()
-  }, [thumbnailImageKey])
+  }, [watchedThumbailimageKey])
 
 
 
   return (
-    <div>
+    <form onSubmit={handleSubmit(onSubmit)}>
       {id && <h1 className="text-xl font-bold mb-8">記事編集</h1>}
       {!id && <h1 className="text-xl font-bold mb-8">新規作成</h1>}
       <div className="mb-4">
         <div className="">タイトル</div>
-        <input id="title" value={title} name="title" type="text" className="w-full border border-gray-300 rounded h-8 p-6" onChange={handleChange}/>
+        <input id="title" type="text" className="w-full border border-gray-300 rounded h-8 p-6" {...register('title', {required: 'タイトルを入力してください'})}/>
+        {errors.title && <span className="text-red-500">{errors.title.message}</span>}
       </div>
       <div className="mb-4">
         <div className="">内容</div>
-        <textarea id="content" value={content} name="content" className="w-full border border-gray-300 rounded h-32 p-6" onChange={handleChange}></textarea>
+        <textarea id="content" className="w-full border border-gray-300 rounded h-32 p-6" {...register('content', {required: '内容を入力してください'})}></textarea>
+        {errors.content && <span className="text-red-500">{errors.content.message}</span>}
       </div>
       <div className="mb-4">
         <div className="">サムネイルURL</div>
@@ -194,12 +238,18 @@ export default function PostForm({id}: {id: string | undefined}) {
     )}
       <div className="mb-4">
         <div className="">カテゴリー</div>
-        <CategoriesSelect selectedCategories={categories} setSelectedCategories={setCategories}/>
+        <Controller name="categories" control={control} render={({ field }) => (
+          <CategoriesSelect
+            selectedCategories={field.value}
+            setSelectedCategories={(categories) => field.onChange(categories)}
+          />
+        )}
+        />
       </div>
       <div className="flex justify-left">
-        <button type='button' className="bg-gray-800 text-white font-bold rounded-lg px-6 py-2 mr-4 hover:cursor-pointer" onClick={handleSubmit}>{id ? '更新' : '新規作成'}</button>
+        <button type='submit' className="bg-gray-800 text-white font-bold rounded-lg px-6 py-2 mr-4 hover:cursor-pointer" disabled={isSubmitting}>{isSubmitting ? '更新中...' : id ? '更新' : '新規作成'}</button>
         {id && <button type='button' className="bg-gray-200 text-gray-800 font-bold rounded-lg px-6 py-2 hover:cursor-pointer" onClick={handleDelete}>削除</button>}
       </div>
-  </div>
+    </form>
   )
 }
