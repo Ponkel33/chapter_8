@@ -1,0 +1,110 @@
+[33mcommit c45002997d5115c22cb4bf06fbf0b3047a1dd4f9[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/task_11_supabase[m[33m)[m
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Sun Jan 11 23:12:36 2026 +0900
+
+    useFetchの適用
+
+[33mcommit 491fcae3ade98f9132a0b65052e7e89cbbefd895[m
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Sun Jan 11 17:47:18 2026 +0900
+
+    SWRの適用
+
+[33mcommit 77e6cc18b923c371a4f5301ca3e62b92fad1efeb[m
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Sun Nov 16 21:02:26 2025 +0900
+
+    React Hook Formの適用(admin_post/admin_catetory/login)
+
+[33mcommit f356c700386d2872f0f3e75c96d97c6db12555d9[m
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Mon Nov 3 20:07:48 2025 +0900
+
+    .envのgitデータ削除
+
+[33mcommit 73bdf540cf3ecc2a5757f7279c1e0877c8adc91d[m
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Mon Nov 3 19:57:11 2025 +0900
+
+    Supabase対応
+
+[33mcommit 0c7f45ea65886cfbe84d154ac14f718df032bd78[m[33m ([m[1;32mmain[m[33m)[m
+Merge: 98e8e18 505d557
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Mon Oct 13 23:17:34 2025 +0900
+
+    Merge pull request #3 from Ponkel33/feature/chapter_10_local
+    
+    Feature/chapter 10 local
+
+[33mcommit 505d557675980f37589eeca2203c709d02a40e19[m[33m ([m[1;32mfeature/chapter_10_local[m[33m)[m
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Mon Oct 13 21:09:35 2025 +0900
+
+    PostFormのコンポーネント化
+
+[33mcommit 08d002f3d1eecadaf2062a747a8dc736b2cd6abc[m
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Mon Oct 13 11:19:03 2025 +0900
+
+    カテゴリ登録、編集を共通コンポーネント化
+
+[33mcommit 13d5c8df922f9a8fb3f012e5831254713d3cf086[m
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Sun Oct 5 21:45:16 2025 +0900
+
+    カテゴリー登録の機能の追加
+
+[33mcommit 74a3383c92fef6407f9ed5daa5d7a54939db172a[m
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Mon Sep 29 22:37:49 2025 +0900
+
+    記事登録のカテゴリ選択以外実装済
+
+[33mcommit 6730a5bd2268387fd4b0272452d3654210baf81c[m
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Sun Aug 24 23:15:34 2025 +0900
+
+    途中版(記事のpostAPIまで)
+
+[33mcommit 98e8e18c7b1ea8efe408f0789ec6e1b255a0e1e7[m
+Merge: 9457cac e13d7d4
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Sat Aug 23 15:16:57 2025 +0900
+
+    Merge pull request #2 from Ponkel33/feature_chapter_9
+    
+    microCMS対応
+
+[33mcommit e13d7d48ee6002faf1f9d81a0386e1e829c6927e[m[33m ([m[1;32mfeature_chapter_9[m[33m)[m
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Mon Aug 18 22:10:08 2025 +0900
+
+    microCMS対応
+
+[33mcommit 9457cac9cfa2e845c6307a317a58415effb503f2[m[33m ([m[1;32mfeature_check[m[33m)[m
+Merge: e390038 3878e46
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Mon Aug 18 20:47:00 2025 +0900
+
+    Merge pull request #1 from Ponkel33/feature_check
+    
+    Feature check
+
+[33mcommit 3878e46ed247eae8b716a8efe622f93a68669551[m
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Mon Aug 18 16:14:41 2025 +0900
+
+    Typesのディレクトリ構造の見直し
+
+[33mcommit eaa958c49a2bb642fac68a6d7076f39ba8df6a38[m
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Mon Aug 18 16:03:21 2025 +0900
+
+    Chapter7のNext.js化
+
+[33mcommit e39003832345c99546cc25261af9d7974851ca26[m
+Author: Ponkel33 <the.orangutans.w@gmail.com>
+Date:   Mon Aug 18 14:49:27 2025 +0900
+
+    Initial commit from Create Next App
