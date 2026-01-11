@@ -10,7 +10,9 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ChangeEvent } from 'react';
 import Image from 'next/image';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import useSWR from 'swr';
+// import useSWR from 'swr';
+import { useFetch } from '@/app/_hooks/useFetch'
+import { OwnPost } from '@/app/_types/Posts'
 
 type Inputs = {
   title: string;
@@ -19,18 +21,22 @@ type Inputs = {
   categories: Category[];
 };
 
-const fetcher = async([url, token]: [string, string]) => {
-  const res = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: token,
-    },
-  });
-  if(!res.ok) {
-    throw new Error('データの取得に失敗しました');
-  }
-  return res.json();
-};
+type PostResponse = {
+  post: OwnPost;
+}
+
+// const fetcher = async([url, token]: [string, string]) => {
+//   const res = await fetch(url, {
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Authorization: token,
+//     },
+//   });
+//   if(!res.ok) {
+//     throw new Error('データの取得に失敗しました');
+//   }
+//   return res.json();
+// };
 
 export default function PostForm({id}: {id: string | undefined}) {
 
@@ -80,9 +86,8 @@ export default function PostForm({id}: {id: string | undefined}) {
       // setContent(data.post.content)
       // setThumbnailImageKey(data.post.thumbnailImageKey)
       // setCategories(data.post.postCategories.map((postCategory: { category: Category }) => postCategory.category))
-  const { data, error, isLoading } = useSWR(
-    id && token ? [`/api/admin/posts/${id}`, token]: null,
-    fetcher
+  const { data, error, isLoading } = useFetch<PostResponse>(
+    id ? `/api/admin/posts/${id}` : null
   );
 
   useEffect(() => {
@@ -232,7 +237,7 @@ export default function PostForm({id}: {id: string | undefined}) {
     return <div>読み込み中...</div>;
   }
 
-  if(error) {
+  if(id && error) {
     return <div>エラーが発生しました</div>;
   }
 

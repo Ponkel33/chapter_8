@@ -3,24 +3,30 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession"
 import { useForm, SubmitHandler } from "react-hook-form"
-import useSWR from "swr"
+// import useSWR from "swr"
+import { Category } from "@/app/_types/Category";
+import { useFetch } from '@/app/_hooks/useFetch'
+
+type CategoryResponse = {
+  category: Category
+}
 
 type Inputs = {
   name: string
 }
 
-const fetcher = async ([url, token]: [string, string]) => {
-  const res = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: token,
-    },
-  })
-  if (!res.ok) {
-    throw new Error('データの取得に失敗しました')
-  }
-  return res.json()
-}
+// const fetcher = async ([url, token]: [string, string]) => {
+//   const res = await fetch(url, {
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Authorization: token,
+//     },
+//   })
+//   if (!res.ok) {
+//     throw new Error('データの取得に失敗しました')
+//   }
+//   return res.json()
+// }
 
 export default function CategoryForm( {id}: {id: string | undefined}) {
   // const [name, setName] = useState('')
@@ -55,9 +61,8 @@ export default function CategoryForm( {id}: {id: string | undefined}) {
   //   fetcher()
   // }, [id, token, reset])
 
-  const { data, error, isLoading } = useSWR(
-    id && token ? [`/api/admin/categories/${id}`, token]: null,
-    fetcher
+  const { data, error, isLoading } = useFetch<CategoryResponse>(
+    id ? `/api/admin/categories/${id}` : null
   )
 
   useEffect(() => {
@@ -125,7 +130,7 @@ export default function CategoryForm( {id}: {id: string | undefined}) {
     return <div>読み込み中...</div>
   }
 
-  if (error) {
+  if (id && error) {
     return <div>エラーが発生しました</div>
   }
 

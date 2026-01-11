@@ -2,7 +2,8 @@ import * as React from 'react'
 import { Category } from '@/app/_types/Category'
 // import { useEffect } from 'react'
 // import { useState } from 'react'
-import useSWR from 'swr'
+// import useSWR from 'swr'
+import { useFetch } from '@/app/_hooks/useFetch'
 
 import Box from '@mui/material/Box'
 import OutlinedInput from '@mui/material/OutlinedInput'
@@ -10,36 +11,37 @@ import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 import Select from '@mui/material/Select'
 import Chip from '@mui/material/Chip'
-import { useSupabaseSession } from '@/app/_hooks/useSupabaseSession'
+// import { useSupabaseSession } from '@/app/_hooks/useSupabaseSession'
+
+type CategoriesResponse = {
+  categories: Category[]
+}
 
 interface Props {
   selectedCategories: Category[]
   setSelectedCategories: (categories: Category[]) => void
 }
 
-const fetcher = async ([url, token]: [string, string]) => {
-  const res = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: token,
-    },
-  });
-  if(!res.ok) {
-    throw new Error('データ取得に失敗しました');
-  }
-  return res.json();
-};
+// const fetcher = async ([url, token]: [string, string]) => {
+//   const res = await fetch(url, {
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Authorization: token,
+//     },
+//   });
+//   if(!res.ok) {
+//     throw new Error('データ取得に失敗しました');
+//   }
+//   return res.json();
+// };
 
 export const CategoriesSelect = ({
   selectedCategories, setSelectedCategories
  }: Props) => {
   // const [categories, setCategories] = useState<Category[]>([])
-  const { token } = useSupabaseSession()
+  // const { token } = useSupabaseSession()
 
-  const { data, error } = useSWR(
-    token ? [`/api/admin/categories`, token] : null,
-    fetcher
-  );
+  const { data, error } = useFetch<CategoriesResponse>(`/api/admin/categories`);
 
   const categories: Category[] = data?.categories || [];
 

@@ -6,20 +6,26 @@ import { OwnPost } from '@/app/_types/Posts';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { supabase } from "@/utils/supabase";
-import useSWR from 'swr'
+// import useSWR from 'swr';
+import { useFetch } from "@/app/_hooks/useFetch"
+
+type PostResponse = {
+  post: OwnPost;
+}
+
 
 // type response = {
 //   message: string;
 //   post: MicroCMSPost;
 // }
 
-const fetcher = async(url: string) => {
-  const res = await fetch(url)
-  if (!res.ok) {
-    throw new Error('データの取得に失敗しました')
-  }
-  return res.json()
-}
+// const fetcher = async(url: string) => {
+//   const res = await fetch(url)
+//   if (!res.ok) {
+//     throw new Error('データの取得に失敗しました')
+//   }
+//   return res.json()
+// }
 
 export default function Posts() {
   const { id } = useParams<{ id: string }>();
@@ -50,10 +56,7 @@ export default function Posts() {
   //   fetcher();
   // }, [id]);
 
-  const {data, error, isLoading} = useSWR(
-    id ? `/api/posts/${id}` : null,
-    fetcher
-  );
+  const {data, error, isLoading} = useFetch<PostResponse>(id ? `/api/posts/${id}` : null, false);
 
   if(isLoading)
     return <div>情報取得中...</div>
@@ -61,10 +64,10 @@ export default function Posts() {
   if(error)
     return <div>エラーが発生しました</div>
 
-  if(!data.post)
+  if(!data?.post)
     return <div>投稿が見つかりません</div>
 
-  const post: OwnPost = data.post;
+  const post = data.post;
 
   // useEffect(() => {
   //   if(!post?.thumbnailImageKey) return;

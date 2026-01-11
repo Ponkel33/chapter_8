@@ -5,15 +5,20 @@ import React from "react";
 // import { useState, useEffect } from "react";
 // import { MicroCMSPost } from '@/app/_types/Posts';
 import { OwnPost } from '@/app/_types/Posts';
-import useSWR from 'swr'
+// import useSWR from 'swr';
+import { useFetch } from '@/app/_hooks/useFetch';
 
-const fetcher = async(url: string) => {
-  const res = await fetch(url)
-  if (!res.ok) {
-    throw new Error('データの取得に失敗しました')
-  }
-  return res.json()
+type PostsResponse = {
+  posts: OwnPost[]
 }
+
+// const fetcher = async(url: string) => {
+//   const res = await fetch(url)
+//   if (!res.ok) {
+//     throw new Error('データの取得に失敗しました')
+//   }
+//   return res.json()
+// }
 
 export default function Home () {
   // const [posts, setPosts] = useState<OwnPost[]>([]);
@@ -39,7 +44,7 @@ export default function Home () {
   //   return <div className="text-2xl text-center">情報取得中</div>;
   // }
 
-  const {data, error, isLoading} = useSWR('/api/posts', fetcher);
+  const {data, error, isLoading} = useFetch<PostsResponse>('/api/posts', false);
   const posts: OwnPost[] = data?.posts || []
 
   if(error)
