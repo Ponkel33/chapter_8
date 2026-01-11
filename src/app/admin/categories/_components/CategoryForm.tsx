@@ -3,9 +3,23 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession"
 import { useForm, SubmitHandler } from "react-hook-form"
+import useSWR from "swr"
 
 type Inputs = {
   name: string
+}
+
+const fetcher = async ([url, token]: [string, string]) => {
+  const res = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: token,
+    },
+  })
+  if (!res.ok) {
+    throw new Error('データの取得に失敗しました')
+  }
+  return res.json()
 }
 
 export default function CategoryForm( {id}: {id: string | undefined}) {
@@ -18,10 +32,45 @@ export default function CategoryForm( {id}: {id: string | undefined}) {
   const router = useRouter()
   const { token } = useSupabaseSession()
 
+  // useEffect(() => {
+  //   if (!token) return
+  //   if (!id) return
+  //   const fetcher = async () => {
+  //     try{
+  //       const res = await fetch(`/api/admin/categories/${id}`,{
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           Authorization: token,
+  //         },
+  //       })
+  //       const data = await res.json()
+  //         // setName(data.category.name)
+  //         reset({
+  //           name: data.category.name,
+  //         })
+  //     } catch (error) {
+  //       console.error('エラーが発生しました:', error)
+  //     }
+  //   }
+  //   fetcher()
+  // }, [id, token, reset])
+
+  const { data, error, isLoading } = useSWR(
+    id && token ? [`/api/admin/categories/${id}`, token]: null,
+    fetcher
+  )
+
+  useEffect(() => {
+    if (data?.category) {
+      reset({
+        name: data.category.name,
+      })
+    }
+  }, [data, reset])
+
   // const handleSubmit = async (e: React.FormEvent) => {
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     // e.preventDefault()
-
     if (!token) return
     try{
       if (!id) {
@@ -72,34 +121,18 @@ export default function CategoryForm( {id}: {id: string | undefined}) {
     }
   }
 
+  if (id && isLoading) {
+    return <div>読み込み中...</div>
+  }
+
+  if (error) {
+    return <div>エラーが発生しました</div>
+  }
 
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   const { value } = e.target
   //   setName(value)
   // }
-
-  useEffect(() => {
-    if (!token) return
-    if (!id) return
-    const fetcher = async () => {
-      try{
-        const res = await fetch(`/api/admin/categories/${id}`,{
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: token,
-          },
-        })
-        const data = await res.json()
-          // setName(data.category.name)
-          reset({
-            name: data.category.name,
-          })
-      } catch (error) {
-        console.error('エラーが発生しました:', error)
-      }
-    }
-    fetcher()
-  }, [id, token, reset])
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

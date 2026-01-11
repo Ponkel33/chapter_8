@@ -10,12 +10,26 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ChangeEvent } from 'react';
 import Image from 'next/image';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import useSWR from 'swr';
 
 type Inputs = {
   title: string;
   content: string;
   thumbnailImageKey: string;
   categories: Category[];
+};
+
+const fetcher = async([url, token]: [string, string]) => {
+  const res = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: token,
+    },
+  });
+  if(!res.ok) {
+    throw new Error('データの取得に失敗しました');
+  }
+  return res.json();
 };
 
 export default function PostForm({id}: {id: string | undefined}) {
@@ -48,7 +62,59 @@ export default function PostForm({id}: {id: string | undefined}) {
     }
   });
 
-  const watchedThumbailimageKey = watch('thumbnailImageKey');
+  const watchedThumbnailimageKey = watch('thumbnailImageKey');
+
+    //IDに基づいて記事を取得
+  // useEffect(() => {
+  //   const fetcher = async () => {
+  //     if (!token) return
+  //     try{
+  //     const res = await fetch(`/api/admin/posts/${id}`,{
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: token,
+  //       },
+  //     })
+  //     const data = await res.json()
+      // setTitle(data.post.title)
+      // setContent(data.post.content)
+      // setThumbnailImageKey(data.post.thumbnailImageKey)
+      // setCategories(data.post.postCategories.map((postCategory: { category: Category }) => postCategory.category))
+  const { data, error, isLoading } = useSWR(
+    id && token ? [`/api/admin/posts/${id}`, token]: null,
+    fetcher
+  );
+
+  useEffect(() => {
+    if(data?.post) {
+      reset({
+        title: data.post.title,
+        content: data.post.content,
+        thumbnailImageKey: data.post.thumbnailImageKey,
+        categories: data.post.postCategories.map((postCategory: { category: Category }) => postCategory.category),
+      });
+    }
+  }, [data, reset]);
+
+  useEffect(() => {
+    if (!watchedThumbnailimageKey) {
+      setThumbnailImageUrl(null);
+      return;
+    }
+
+    // アップロード時に取得した、thumbnailImageKeyを用いて画像のURLを取得
+    const fetcher = async () => {
+      const {
+        data: { publicUrl },
+      } = await supabase.storage
+        .from('post_thumbnail')
+        .getPublicUrl(watchedThumbnailimageKey);
+
+      setThumbnailImageUrl(publicUrl)
+    }
+
+    fetcher();
+  }, [watchedThumbnailimageKey]);
 
   // const handleSubmit = async (e: React.FormEvent) => {
   //   e.preventDefault()
@@ -160,58 +226,15 @@ export default function PostForm({id}: {id: string | undefined}) {
         shouldDirty: true,
         shouldValidate: true
       });
+  };
+
+  if(id && isLoading) {
+    return <div>読み込み中...</div>;
   }
 
-  //IDに基づいて記事を取得
-  useEffect(() => {
-    const fetcher = async () => {
-      if (!token) return
-      try{
-      const res = await fetch(`/api/admin/posts/${id}`,{
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token,
-        },
-      })
-      const data = await res.json()
-      // setTitle(data.post.title)
-      // setContent(data.post.content)
-      // setThumbnailImageKey(data.post.thumbnailImageKey)
-      // setCategories(data.post.postCategories.map((postCategory: { category: Category }) => postCategory.category))
-      reset({
-        title: data.post.title,
-        content: data.post.content,
-        thumbnailImageKey: data.post.thumbnailImageKey,
-        categories: data.post.postCategories.map((postCategory: { category: Category }) => postCategory.category)
-      });
-      } catch (error) {
-        console.error('エラーが発生しました:', error);
-      }
-    }
-    fetcher();
-  }, [id, token, reset])
-
-  useEffect(() => {
-    if (!watchedThumbailimageKey) {
-      setThumbnailImageUrl(null)
-      return
-    }
-
-    // アップロード時に取得した、thumbnailImageKeyを用いて画像のURLを取得
-    const fetcher = async () => {
-      const {
-        data: { publicUrl },
-      } = await supabase.storage
-        .from('post_thumbnail')
-        .getPublicUrl(watchedThumbailimageKey)
-
-      setThumbnailImageUrl(publicUrl)
-    }
-
-    fetcher()
-  }, [watchedThumbailimageKey])
-
-
+  if(error) {
+    return <div>エラーが発生しました</div>;
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

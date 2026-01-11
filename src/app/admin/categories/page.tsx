@@ -1,29 +1,55 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+// import { useEffect, useState } from "react";
 import { Category } from "@/app/_types/Category";
 import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession"
+import useSWR from "swr";
 
+const fetcher = async ([url, token]: [string, string]) => {
+  const res = await fetch(url, {
+    headers: {
+      'Content-type': 'application/json',
+      Authorization: token,
+    },
+  })
+  if (!res.ok) {
+    throw new Error('データの取得に失敗しました')
+  }
+  return res.json()
+}
 
 export default function AdminCategories() {
-  const [categories, setCategories] = useState<Category[]>([])
+  // const [categories, setCategories] = useState<Category[]>([])
   const { token } = useSupabaseSession()
 
-  useEffect(() => {
-    if (!token) return
+  // useEffect(() => {
+  //   if (!token) return
 
-    const fetcher = async () => {
-      const res = await fetch("/api/admin/categories", {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token,
-        },
-      })
-      const data = await res.json()
-      setCategories(data.categories)
-    }
-    fetcher()
-  }, [token])
+  //   const fetcher = async () => {
+  //     const res = await fetch("/api/admin/categories", {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: token,
+  //       },
+  //     })
+  //     const data = await res.json()
+  //     setCategories(data.categories)
+  //   }
+  //   fetcher()
+  // }, [token])
+
+  const {data, error, isLoading} = useSWR (
+    token ? [`/api/admin/categories`, token] : null,
+    fetcher
+  )
+
+  if(isLoading)
+    return <div>読み込み中...</div>
+
+  if(error)
+    return <div>エラーが発生しました</div>
+
+  const categories: Category[] = data?.categories || []
 
   return (
     <div>
