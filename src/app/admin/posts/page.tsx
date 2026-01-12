@@ -1,20 +1,62 @@
 "use client";
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+// import { useEffect, useState } from 'react';
 import { OwnPost } from '@/app/_types/Posts';
+// import { useSupabaseSession } from '@/app/_hooks/useSupabaseSession';
+// import useSWR from "swr";
+import { useFetch } from '@/app/_hooks/useFetch'
+
+type PostsResponse = {
+  posts: OwnPost[];
+}
+
+// const fetcher = async ([url, token]: [string, string]) => {
+//   const res = await fetch(url, {
+//     headers: {
+//       'Content-type': 'application/json',
+//       Authorization: token,
+//     },
+//   })
+//   if(!res.ok) {
+//     throw new Error('データの取得に失敗しました')
+//   }
+//   return res.json()
+// }
+
 
 
 export default function AdminPosts() {
 
-  const [posts, setPosts] = useState<OwnPost[]>([])
-  useEffect(() => {
-    const fetcher = async () => {
-      const res = await fetch("/api/admin/posts")
-      const data = await res.json()
-      setPosts(data.posts)
-    }
-  fetcher()
-  }, [])
+  // const [posts, setPosts] = useState<OwnPost[]>([])
+  // const { token } = useSupabaseSession()
+
+  // useEffect(() => {
+  //   if (!token) return
+
+  //   const fetcher = async () => {
+  //     const res = await fetch('/api/admin/posts', {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: token, /// Header に token を付与
+  //       },
+  //     })
+  //     const { posts } = await res.json()
+  //     setPosts([...posts])
+  //   }
+
+  //   fetcher()
+  // }, [token])
+
+
+  const {data, error, isLoading} = useFetch<PostsResponse>('/api/admin/posts');
+
+  if(isLoading)
+    return <div>読み込み中...</div>
+
+  if(error)
+    return <div>エラーが発生しました</div>
+
+  const posts: OwnPost[] = data?.posts || [] 
 
   return (
     <div className="">

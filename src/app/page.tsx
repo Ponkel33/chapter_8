@@ -2,33 +2,56 @@
 
 import Link from "next/link";
 import React from "react";
-import { useState, useEffect } from "react";
+// import { useState, useEffect } from "react";
 // import { MicroCMSPost } from '@/app/_types/Posts';
 import { OwnPost } from '@/app/_types/Posts';
+// import useSWR from 'swr';
+import { useFetch } from '@/app/_hooks/useFetch';
+
+type PostsResponse = {
+  posts: OwnPost[]
+}
+
+// const fetcher = async(url: string) => {
+//   const res = await fetch(url)
+//   if (!res.ok) {
+//     throw new Error('データの取得に失敗しました')
+//   }
+//   return res.json()
+// }
 
 export default function Home () {
-  const [posts, setPosts] = useState<OwnPost[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  // const [posts, setPosts] = useState<OwnPost[]>([]);
+  // const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const fetcher = async () => {
-      setLoading(true);  
-      try {
-      const res = await fetch("api/posts")
-      const data = await res.json();
-      setPosts(data.posts);
-      } catch (error) {
-        console.error('エラーが発生しました:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetcher();
-  }, []);
+  // useEffect(() => {
+  //   const fetcher = async () => {
+  //     setLoading(true);  
+  //     try {
+  //     const res = await fetch("api/posts")
+  //     const data = await res.json();
+  //     setPosts(data.posts);
+  //     } catch (error) {
+  //       console.error('エラーが発生しました:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetcher();
+  // }, []);
 
-  if (loading) {
-    return <div className="text-2xl text-center">情報取得中</div>;
-  }
+  // if (loading) {
+  //   return <div className="text-2xl text-center">情報取得中</div>;
+  // }
+
+  const {data, error, isLoading} = useFetch<PostsResponse>('/api/posts', false);
+  const posts: OwnPost[] = data?.posts || []
+
+  if(error)
+    return <div>エラーが発生しました</div>
+
+  if(isLoading)
+    return <div>情報取得中...</div>
 
   return (
     <div className="max-w-3xl mx-auto my-2 p-2">
